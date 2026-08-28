@@ -4,6 +4,7 @@ from datetime import datetime
 
 app = FastAPI()
 
+# Simple In-Memory tracker for daily limit (2000 requests/day)
 request_tracker = {
     "date": datetime.now().strftime("%Y-%m-%d"),
     "count": 0
@@ -17,10 +18,12 @@ async def num_info(
 ):
     current_date = datetime.now().strftime("%Y-%m-%d")
     
+    # Reset count if date changes
     if request_tracker["date"] != current_date:
         request_tracker["date"] = current_date
         request_tracker["count"] = 0
 
+    # Check daily limit (2000 requests)
     if request_tracker["count"] >= 2000:
         return {
             "developer": "@coderpetro",
@@ -29,7 +32,10 @@ async def num_info(
             "result": "Daily limit of 2000 requests exceeded. Try again tomorrow."
         }
 
+    # Increment request count
     request_tracker["count"] += 1
+
+    # Target backend API URL
     target_url = f"https://paid.originalapis.workers.dev/leak?key={key}&query={query}"
     
     try:
@@ -49,20 +55,21 @@ async def num_info(
             except Exception:
                 backend_data = {}
 
-            if not backend_data or (isinstance(backend_data, dict) and len(backend_data) == 0):
+            # Clean up unwanted metadata fields from the response
+            if isinstance(backend_data, dict):
+                backend_data.pop("API_Developer", None)
+                if "result" in backend_data and isinstance(backend_data["result"], dict):
+                    backend_data["result"].pop("API_Developer", None)
+
+            # Check if the inner result is empty or missing data
+            inner_result = backend_data.get("result")
+            if not backend_data or inner_result == {} or inner_result is None:
                 return {
                     "developer": "@coderpetro",
                     "expiry": "2026-09-29",
                     "query": query,
                     "result": "No data found"
                 }
-
-            # Backend-ൽ നിന്ന് വരുന്ന result ഒരു dict ആണെങ്കിൽ അതിലുള്ള 'API_Developer' നീക്കം ചെയ്യാം
-            if isinstance(backend_data, dict):
-                backend_data.pop("API_Developer", None)
-                # അല്ലെങ്കിൽ 'result' എന്ന കീയ്ക്കുള്ളിൽ ആണെങ്കിൽ:
-                if "result" in backend_data and isinstance(backend_data["result"], dict):
-                    backend_data["result"].pop("API_Developer", None)
 
             return {
                 "developer": "@coderpetro",
