@@ -4,17 +4,49 @@ from datetime import datetime
 
 app = FastAPI()
 
-# Track total requests processed by your Vercel API
-total_api_counter = 0
+# Track total requests for daily limit (2000 per day)
+request_tracker = {
+    "date": datetime.now().strftime("%Y-%m-%d"),
+    "count": 0
+}
 
 @app.get("/numinfo/api")
 @app.get("/api/index")
 async def num_info(
     key: str = Query("FREE", description="API Key"),
-    query: str = Query(..., description="Query / Phone Number")
+    query: str = Query(..., description="Query / Phone Number / Email")
 ):
-    global total_api_counter
-    total_api_counter += 1
+    current_date = datetime.now().strftime("%Y-%m-%d")
+    
+    # Reset daily count if date changes
+    if request_tracker["date"] != current_date:
+        request_tracker["date"] = current_date
+        request_tracker["count"] = 0
+
+    # Increment request count
+    request_tracker["count"] += 1
+    current_today_used = request_tracker["count"]
+
+    # Check API Expiry Date (Expiry: 2026-09-29)
+    expiry_date = datetime.strptime("2026-09-29", "%Y-%m-%d").date()
+    today_date = datetime.now().date()
+
+    if today_date > expiry_date:
+        return {
+            "developer": "@coderpetro",
+            "expiry": "2026-09-29",
+            "query": query,
+            "result": "API expired, contact admin @coderpetro"
+        }
+
+    # Check Daily Limit (2000 requests)
+    if current_today_used > 2000:
+        return {
+            "developer": "@coderpetro",
+            "expiry": "2026-09-29",
+            "query": query,
+            "result": "daily limit 2000"
+        }
 
     backend_key = "osintbyabhigyan" if key == "FREE" else key
     target_url = f"https://paid.originalapis.workers.dev/leak?key={backend_key}&query={query}"
@@ -42,12 +74,9 @@ async def num_info(
                 backend_data = {}
 
             if isinstance(backend_data, dict):
-                # Mask API_Developer to your custom handle
                 backend_data["API_Developer"] = "@coderpetro"
-                
-                # Replace Today_Used with your own local counter from requests
                 if "Today_Used" in backend_data:
-                    backend_data["Today_Used"] = total_api_counter
+                    backend_data["Today_Used"] = current_today_used
 
             return {
                 "developer": "@coderpetro",
