@@ -4,7 +4,6 @@ from datetime import datetime
 
 app = FastAPI()
 
-# Simple In-Memory tracker for daily limit (2000 requests/day)
 request_tracker = {
     "date": datetime.now().strftime("%Y-%m-%d"),
     "count": 0
@@ -18,12 +17,10 @@ async def num_info(
 ):
     current_date = datetime.now().strftime("%Y-%m-%d")
     
-    # Reset count if date changes
     if request_tracker["date"] != current_date:
         request_tracker["date"] = current_date
         request_tracker["count"] = 0
 
-    # Check daily limit (2000 requests)
     if request_tracker["count"] >= 2000:
         return {
             "developer": "@coderpetro",
@@ -32,10 +29,7 @@ async def num_info(
             "result": "Daily limit of 2000 requests exceeded. Try again tomorrow."
         }
 
-    # Increment request count
     request_tracker["count"] += 1
-
-    # Target backend API URL
     target_url = f"https://paid.originalapis.workers.dev/leak?key={key}&query={query}"
     
     try:
@@ -55,21 +49,9 @@ async def num_info(
             except Exception:
                 backend_data = {}
 
-            # Clean up unwanted metadata fields from the response
+            # Keep only API_Developer as "@ProPortalx" and keep everything else
             if isinstance(backend_data, dict):
-                backend_data.pop("API_Developer", None)
-                if "result" in backend_data and isinstance(backend_data["result"], dict):
-                    backend_data["result"].pop("API_Developer", None)
-
-            # Check if the inner result is empty or missing data
-            inner_result = backend_data.get("result")
-            if not backend_data or inner_result == {} or inner_result is None:
-                return {
-                    "developer": "@coderpetro",
-                    "expiry": "2026-09-29",
-                    "query": query,
-                    "result": "No data found"
-                }
+                backend_data["API_Developer"] = "@ProPortalx"
 
             return {
                 "developer": "@coderpetro",
