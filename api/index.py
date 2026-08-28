@@ -10,8 +10,8 @@ request_tracker = {
     "count": 0
 }
 
-@app.get("/api/index")
 @app.get("/numinfo/api")
+@app.get("/api/index")
 async def num_info(
     key: str = Query(..., description="API Key"),
     query: str = Query(..., description="Query / Phone Number")
@@ -35,7 +35,7 @@ async def num_info(
     # Increment request count
     request_tracker["count"] += 1
 
-    # Target backend API URL
+    # Target backend API URL using your provided key and query
     target_url = f"https://paid.originalapis.workers.dev/leak?key={key}&query={query}"
     
     try:
