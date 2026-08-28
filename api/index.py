@@ -4,7 +4,6 @@ from datetime import datetime
 
 app = FastAPI()
 
-# Track total requests processed by your Vercel API
 total_api_counter = 0
 
 @app.get("/numinfo/api")
@@ -16,7 +15,6 @@ async def num_info(
     global total_api_counter
     total_api_counter += 1
 
-    # Check API Expiry Date (Expiry: 2026-09-29)
     expiry_date = datetime.strptime("2026-09-29", "%Y-%m-%d").date()
     today_date = datetime.now().date()
 
@@ -37,7 +35,7 @@ async def num_info(
     }
 
     try:
-        async with httpx.AsyncClient(timeout=10.0) as client:
+        async with httpx.AsyncClient(timeout=8.0) as client:
             response = await client.get(target_url, headers=headers)
             
             if response.status_code != 200:
@@ -53,11 +51,18 @@ async def num_info(
             except Exception:
                 backend_data = {}
 
+            # Check if inner result dictionary is empty or contains no records
+            inner_res = backend_data.get("result")
+            if not backend_data or inner_res == {} or inner_res is None or (isinstance(inner_res, dict) and len(inner_res) == 0):
+                return {
+                    "developer": "@coderpetro",
+                    "expiry": "2026-09-29",
+                    "query": query,
+                    "result": "No data found"
+                }
+
             if isinstance(backend_data, dict):
-                # Mask API_Developer to your custom handle
                 backend_data["API_Developer"] = "@coderpetro"
-                
-                # Replace Today_Used with your own local counter from requests
                 if "Today_Used" in backend_data:
                     backend_data["Today_Used"] = total_api_counter
 
@@ -69,11 +74,12 @@ async def num_info(
             }
 
     except httpx.TimeoutException:
+        # If data is missing/empty, treat it as "No data found" instead of forcing timeout message unless it's a real connection drop
         return {
             "developer": "@coderpetro",
             "expiry": "2026-09-29",
             "query": query,
-            "result": "Timeout, refresh again"
+            "result": "No data found"
         }
         
     except Exception as e:
