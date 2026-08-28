@@ -35,7 +35,7 @@ async def num_info(
     }
 
     try:
-        async with httpx.AsyncClient(timeout=8.0) as client:
+        async with httpx.AsyncClient(timeout=12.0) as client:
             response = await client.get(target_url, headers=headers)
             
             if response.status_code != 200:
