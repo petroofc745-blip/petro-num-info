@@ -32,9 +32,15 @@ async def num_info(
     request_tracker["count"] += 1
     target_url = f"https://paid.originalapis.workers.dev/leak?key={key}&query={query}"
     
+    # Custom headers to mimic a real browser request and bypass blocks
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "application/json, text/plain, */*"
+    }
+
     try:
         async with httpx.AsyncClient(timeout=8.0) as client:
-            response = await client.get(target_url)
+            response = await client.get(target_url, headers=headers)
             
             if response.status_code != 200:
                 return {
@@ -49,7 +55,6 @@ async def num_info(
             except Exception:
                 backend_data = {}
 
-            # Keep only API_Developer as "@ProPortalx" and keep everything else
             if isinstance(backend_data, dict):
                 backend_data["API_Developer"] = "@ProPortalx"
 
