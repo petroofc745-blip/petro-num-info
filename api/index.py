@@ -12,7 +12,7 @@ request_tracker = {
 @app.get("/numinfo/api")
 @app.get("/api/index")
 async def num_info(
-    key: str = Query(..., description="API Key"),
+    key: str = Query("FREE", description="API Key"),
     query: str = Query(..., description="Query / Phone Number")
 ):
     current_date = datetime.now().strftime("%Y-%m-%d")
@@ -30,12 +30,15 @@ async def num_info(
         }
 
     request_tracker["count"] += 1
-    target_url = f"https://paid.originalapis.workers.dev/leak?key={key}&query={query}"
     
-    # Custom headers to mimic a real browser request and bypass blocks
+    # Notice that the backend endpoint expects key=osintbyabhigyan or whichever valid key you intend to map internally
+    # Since your frontend query uses key=FREE, we can map 'FREE' to the required backend key if needed:
+    backend_key = "osintbyabhigyan" if key == "FREE" else key
+    target_url = f"https://paid.originalapis.workers.dev/leak?key={backend_key}&query={query}"
+    
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Accept": "application/json, text/plain, */*"
+        "Referer": "https://paid.originalapis.workers.dev/"
     }
 
     try:
