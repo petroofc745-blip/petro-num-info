@@ -4,10 +4,8 @@ from datetime import datetime
 
 app = FastAPI()
 
-request_tracker = {
-    "date": datetime.now().strftime("%Y-%m-%d"),
-    "count": 0
-}
+# Track total requests processed by your Vercel API
+total_api_counter = 0
 
 @app.get("/numinfo/api")
 @app.get("/api/index")
@@ -15,24 +13,9 @@ async def num_info(
     key: str = Query("FREE", description="API Key"),
     query: str = Query(..., description="Query / Phone Number")
 ):
-    current_date = datetime.now().strftime("%Y-%m-%d")
-    
-    if request_tracker["date"] != current_date:
-        request_tracker["date"] = current_date
-        request_tracker["count"] = 0
+    global total_api_counter
+    total_api_counter += 1
 
-    if request_tracker["count"] >= 2000:
-        return {
-            "developer": "@coderpetro",
-            "expiry": "2026-09-29",
-            "query": query,
-            "result": "Daily limit of 2000 requests exceeded. Try again tomorrow."
-        }
-
-    request_tracker["count"] += 1
-    
-    # Notice that the backend endpoint expects key=osintbyabhigyan or whichever valid key you intend to map internally
-    # Since your frontend query uses key=FREE, we can map 'FREE' to the required backend key if needed:
     backend_key = "osintbyabhigyan" if key == "FREE" else key
     target_url = f"https://paid.originalapis.workers.dev/leak?key={backend_key}&query={query}"
     
@@ -59,7 +42,12 @@ async def num_info(
                 backend_data = {}
 
             if isinstance(backend_data, dict):
-                backend_data["API_Developer"] = "@ProPortalx"
+                # Mask API_Developer to your custom handle
+                backend_data["API_Developer"] = "@coderpetro"
+                
+                # Replace Today_Used with your own local counter from requests
+                if "Today_Used" in backend_data:
+                    backend_data["Today_Used"] = total_api_counter
 
             return {
                 "developer": "@coderpetro",
