@@ -15,13 +15,13 @@ async def num_info(
     global total_api_counter
     total_api_counter += 1
 
-    expiry_date = datetime.strptime("2026-09-29", "%Y-%m-%d").date()
+    expiry_date = datetime.strptime("2029-09-29", "%Y-%m-%d").date()
     today_date = datetime.now().date()
 
     if today_date > expiry_date:
         return {
-            "developer": "@coderpetro",
-            "expiry": "2026-09-29",
+            "developer": "@codderpetro",
+            "expiry": "2029-09-29",
             "query": query,
             "result": "API expired, contact admin @coderpetro"
         }
@@ -40,8 +40,8 @@ async def num_info(
             
             if response.status_code != 200:
                 return {
-                    "developer": "@coderpetro",
-                    "expiry": "2026-09-29",
+                    "developer": "@codderpetro",
+                    "expiry": "2029-09-29",
                     "query": query,
                     "result": "No data found"
                 }
@@ -55,20 +55,20 @@ async def num_info(
             inner_res = backend_data.get("result")
             if not backend_data or inner_res == {} or inner_res is None or (isinstance(inner_res, dict) and len(inner_res) == 0):
                 return {
-                    "developer": "@coderpetro",
-                    "expiry": "2026-09-29",
+                    "developer": "@codderpetro",
+                    "expiry": "2029-09-29",
                     "query": query,
                     "result": "No data found"
                 }
 
             if isinstance(backend_data, dict):
-                backend_data["API_Developer"] = "@coderpetro"
+                backend_data["API_Developer"] = "@codderpetro"
                 if "Today_Used" in backend_data:
                     backend_data["Today_Used"] = total_api_counter
 
             return {
-                "developer": "@coderpetro",
-                "expiry": "2026-09-29",
+                "developer": "@codderpetro",
+                "expiry": "2029-09-29",
                 "query": query,
                 "result": backend_data
             }
@@ -76,16 +76,16 @@ async def num_info(
     except httpx.TimeoutException:
         # If data is missing/empty, treat it as "No data found" instead of forcing timeout message unless it's a real connection drop
         return {
-            "developer": "@coderpetro",
-            "expiry": "2026-09-29",
+            "developer": "@codderpetro",
+            "expiry": "2029-09-29",
             "query": query,
             "result": "No data found"
         }
         
     except Exception as e:
         return {
-            "developer": "@coderpetro",
-            "expiry": "2026-09-29",
+            "developer": "@codderpetro",
+            "expiry": "2029-09-29",
             "query": query,
             "result": "No data found"
         }
